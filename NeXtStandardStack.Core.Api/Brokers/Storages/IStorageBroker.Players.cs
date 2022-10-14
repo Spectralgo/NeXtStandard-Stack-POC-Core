@@ -8,5 +8,6 @@ namespace NeXtStandardStack.Core.Api.Brokers.Storages
     public partial interface IStorageBroker
     {
         ValueTask<Player> InsertPlayerAsync(Player player);
+        IQueryable<Player> SelectAllPlayers();
     }
 }
