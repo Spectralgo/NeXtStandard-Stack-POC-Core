@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "EQ9GheJfWPWKQUblpCSrC77Jr56f77xmLgxvH8IAj+yIM9mWCeYHoXWSPWCqZEN1lwuG/yF1T6Mda5gAxLYqCw==",
+  "dgSpecHash": "gzcm+cKAfvOp4GeKkdXiAcVmqK/u3HiG5bv8boEEXKEDJzfgVZ1in9jOylHNpXP8Cj+Gw2eJDbYQ5bmOvDEjpQ==",
   "success": true,
   "projectFilePath": "C:\\code\\next-standard-stack\\POC\\NeXtStandardStack.Core\\NeXtStandardStack.Core.Api.Tests.Acceptance\\NeXtStandardStack.Core.Api.Tests.Acceptance.csproj",
   "expectedPackageFiles": [
@@ -195,10 +195,7 @@
     "C:\\Users\\rocks\\.nuget\\packages\\xunit.core\\2.4.2-pre.12\\xunit.core.2.4.2-pre.12.nupkg.sha512",
     "C:\\Users\\rocks\\.nuget\\packages\\xunit.extensibility.core\\2.4.2-pre.12\\xunit.extensibility.core.2.4.2-pre.12.nupkg.sha512",
     "C:\\Users\\rocks\\.nuget\\packages\\xunit.extensibility.execution\\2.4.2-pre.12\\xunit.extensibility.execution.2.4.2-pre.12.nupkg.sha512",
-    "C:\\Users\\rocks\\.nuget\\packages\\xunit.runner.visualstudio\\2.4.5\\xunit.runner.visualstudio.2.4.5.nupkg.sha512",
-    "C:\\Users\\rocks\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.3\\microsoft.netcore.app.ref.6.0.3.nupkg.sha512",
-    "C:\\Users\\rocks\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.3\\microsoft.windowsdesktop.app.ref.6.0.3.nupkg.sha512",
-    "C:\\Users\\rocks\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.3\\microsoft.aspnetcore.app.ref.6.0.3.nupkg.sha512"
+    "C:\\Users\\rocks\\.nuget\\packages\\xunit.runner.visualstudio\\2.4.5\\xunit.runner.visualstudio.2.4.5.nupkg.sha512"
   ],
   "logs": []
 }
