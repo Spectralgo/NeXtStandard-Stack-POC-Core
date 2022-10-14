@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using NeXtStandardStack.Core.Api.Brokers.DateTimes;
+using NeXtStandardStack.Core.Api.Brokers.Loggings;
 using NeXtStandardStack.Core.Api.Brokers.Storages;
 
 namespace NeXtStandardStack.Core.Api
@@ -58,6 +60,8 @@ namespace NeXtStandardStack.Core.Api
 
         private static void AddBrokers(IServiceCollection services)
         {
+            services.AddTransient<IDateTimeBroker, DateTimeBroker>();
+            services.AddTransient<ILoggingBroker, LoggingBroker>();
         }
     }
 }
