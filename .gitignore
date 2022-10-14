@@ -348,3 +348,17 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Development appsettings
+/NeXtStandardStack.Core.Api/appsettings.Development.json
+
+# Linqpad test folder
+/playground
+
+
