@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "gzcm+cKAfvOp4GeKkdXiAcVmqK/u3HiG5bv8boEEXKEDJzfgVZ1in9jOylHNpXP8Cj+Gw2eJDbYQ5bmOvDEjpQ==",
+  "dgSpecHash": "hAfoGOqEMh7kaCeTzgAkQNyXLOdnGu2+iXb+TZxQCAr3EWKwvmZA6hdGP2Nd14xcUj14fNj7JJNBEe++gh3dGw==",
   "success": true,
   "projectFilePath": "C:\\code\\next-standard-stack\\POC\\NeXtStandardStack.Core\\NeXtStandardStack.Core.Api.Tests.Acceptance\\NeXtStandardStack.Core.Api.Tests.Acceptance.csproj",
   "expectedPackageFiles": [
