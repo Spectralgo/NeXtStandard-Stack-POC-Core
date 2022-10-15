@@ -167,5 +167,56 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowDependencyValidationExceptionOnModifyIfDbUpdateConcurrencyErrorOccursAndLogAsync()
+        {
+            // given
+            Player randomPlayer = CreateRandomPlayer();
+            var databaseUpdateConcurrencyException = new DbUpdateConcurrencyException();
+
+            var lockedPlayerException =
+                new LockedPlayerException(databaseUpdateConcurrencyException);
+
+            var expectedPlayerDependencyValidationException =
+                new PlayerDependencyValidationException(lockedPlayerException);
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Throws(databaseUpdateConcurrencyException);
+
+            // when
+            ValueTask<Player> modifyPlayerTask =
+                this.playerService.ModifyPlayerAsync(randomPlayer);
+
+            PlayerDependencyValidationException actualPlayerDependencyValidationException =
+                await Assert.ThrowsAsync<PlayerDependencyValidationException>(
+                    modifyPlayerTask.AsTask);
+
+            // then
+            actualPlayerDependencyValidationException.Should()
+                .BeEquivalentTo(expectedPlayerDependencyValidationException);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectPlayerByIdAsync(randomPlayer.Id),
+                    Times.Never);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expectedPlayerDependencyValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.UpdatePlayerAsync(randomPlayer),
+                    Times.Never);
+
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
