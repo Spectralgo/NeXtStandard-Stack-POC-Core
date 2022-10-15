@@ -53,7 +53,9 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
                     firstDate: player.UpdatedDate,
                     secondDate: player.CreatedDate,
                     secondDateName: nameof(Player.CreatedDate)),
-                Parameter: nameof(Player.UpdatedDate)));
+                Parameter: nameof(Player.UpdatedDate)),
+
+                (Rule: IsNotRecent(player.UpdatedDate), Parameter: nameof(player.UpdatedDate)));
         }
 
         public void ValidatePlayerId(Guid playerId) =>

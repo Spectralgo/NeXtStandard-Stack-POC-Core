@@ -109,6 +109,10 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             actualPlayerValidationException.Should()
                 .BeEquivalentTo(expectedPlayerValidationException);
 
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(),
+                    Times.Once);
+
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogError(It.Is(SameExceptionAs(
                     expectedPlayerValidationException))),
@@ -118,9 +122,9 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                 broker.UpdatePlayerAsync(It.IsAny<Player>()),
                     Times.Never);
 
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
-            this.dateTimeBrokerMock.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -139,6 +143,10 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             var expectedPlayerValidationException =
                 new PlayerValidationException(invalidPlayerException);
 
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Returns(randomDateTimeOffset);
+
             // when
             ValueTask<Player> modifyPlayerTask =
                 this.playerService.ModifyPlayerAsync(invalidPlayer);
@@ -151,6 +159,10 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             actualPlayerValidationException.Should()
                 .BeEquivalentTo(expectedPlayerValidationException);
 
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(),
+                    Times.Once);
+
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogError(It.Is(SameExceptionAs(
                     expectedPlayerValidationException))),
@@ -160,9 +172,9 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                 broker.SelectPlayerByIdAsync(invalidPlayer.Id),
                     Times.Never);
 
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
-            this.dateTimeBrokerMock.VerifyNoOtherCalls();
         }
 
         [Theory]
