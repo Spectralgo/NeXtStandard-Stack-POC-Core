@@ -90,7 +90,13 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
                     firstId: inputPlayer.CreatedByUserId,
                     secondId: storagePlayer.CreatedByUserId,
                     secondIdName: nameof(Player.CreatedByUserId)),
-                Parameter: nameof(Player.CreatedByUserId)));
+                Parameter: nameof(Player.CreatedByUserId)),
+
+                (Rule: IsSame(
+                    firstDate: inputPlayer.UpdatedDate,
+                    secondDate: storagePlayer.UpdatedDate,
+                    secondDateName: nameof(Player.UpdatedDate)),
+                Parameter: nameof(Player.UpdatedDate)));
         }
 
         private static dynamic IsInvalid(Guid id) => new
