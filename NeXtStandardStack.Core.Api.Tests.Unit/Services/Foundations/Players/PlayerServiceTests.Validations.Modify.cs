@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
@@ -110,6 +111,47 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
 
             this.storageBrokerMock.Verify(broker =>
                 broker.UpdatePlayerAsync(It.IsAny<Player>()),
+                    Times.Never);
+
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnModifyIfUpdatedDateIsSameAsCreatedDateAndLogItAsync()
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Player randomPlayer = CreateRandomPlayer(randomDateTimeOffset);
+            Player invalidPlayer = randomPlayer;
+            var invalidPlayerException = new InvalidPlayerException();
+
+            invalidPlayerException.AddData(
+                key: nameof(Player.UpdatedDate),
+                values: $"Date is the same as {nameof(Player.CreatedDate)}");
+
+            var expectedPlayerValidationException =
+                new PlayerValidationException(invalidPlayerException);
+
+            // when
+            ValueTask<Player> modifyPlayerTask =
+                this.playerService.ModifyPlayerAsync(invalidPlayer);
+
+            PlayerValidationException actualPlayerValidationException =
+                await Assert.ThrowsAsync<PlayerValidationException>(
+                    modifyPlayerTask.AsTask);
+
+            // then
+            actualPlayerValidationException.Should().BeEquivalentTo(expectedPlayerValidationException);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expectedPlayerValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectPlayerByIdAsync(invalidPlayer.Id),
                     Times.Never);
 
             this.loggingBrokerMock.VerifyNoOtherCalls();
