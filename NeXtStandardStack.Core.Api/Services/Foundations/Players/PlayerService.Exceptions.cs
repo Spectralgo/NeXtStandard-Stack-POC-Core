@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
 using Microsoft.Data.SqlClient;
@@ -12,6 +13,7 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
     public partial class PlayerService
     {
         private delegate ValueTask<Player> ReturningPlayerFunction();
+        private delegate IQueryable<Player> ReturningPlayersFunction();
 
         private async ValueTask<Player> TryCatch(ReturningPlayerFunction returningPlayerFunction)
         {
@@ -61,6 +63,20 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
                     new FailedPlayerServiceException(exception);
 
                 throw CreateAndLogServiceException(failedPlayerServiceException);
+            }
+        }
+
+        private IQueryable<Player> TryCatch(ReturningPlayersFunction returningPlayersFunction)
+        {
+            try
+            {
+                return returningPlayersFunction();
+            }
+            catch (SqlException sqlException)
+            {
+                var failedPlayerStorageException =
+                    new FailedPlayerStorageException(sqlException);
+                throw CreateAndLogCriticalDependencyException(failedPlayerStorageException);
             }
         }
 
