@@ -47,5 +47,8 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
 
                 return maybePlayer;
             });
+
+        public ValueTask<Player> ModifyPlayerAsync(Player player) =>
+            throw new NotImplementedException();
     }
 }

@@ -64,6 +64,17 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
         private static DateTimeOffset GetRandomDateTimeOffset() =>
             new DateTimeRange(earliestDate: new DateTime()).GetValue();
 
+        private static Player CreateRandomModifyPlayer(DateTimeOffset dateTimeOffset)
+        {
+            int randomDaysInPast = GetRandomNegativeNumber();
+            Player randomPlayer = CreateRandomPlayer(dateTimeOffset);
+
+            randomPlayer.CreatedDate =
+                randomPlayer.CreatedDate.AddDays(randomDaysInPast);
+
+            return randomPlayer;
+        }
+
         private static IQueryable<Player> CreateRandomPlayers()
         {
             return CreatePlayerFiller(dateTimeOffset: GetRandomDateTimeOffset())
