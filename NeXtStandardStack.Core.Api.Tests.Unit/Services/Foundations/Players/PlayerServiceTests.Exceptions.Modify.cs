@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
 using FluentAssertions;
@@ -208,6 +209,57 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogError(It.Is(SameExceptionAs(
                     expectedPlayerDependencyValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.UpdatePlayerAsync(randomPlayer),
+                    Times.Never);
+
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowServiceExceptionOnModifyIfServiceErrorOccursAndLogItAsync()
+        {
+            // given
+            Player randomPlayer = CreateRandomPlayer();
+            var serviceException = new Exception();
+
+            var failedPlayerServiceException =
+                new FailedPlayerServiceException(serviceException);
+
+            var expectedPlayerServiceException =
+                new PlayerServiceException(failedPlayerServiceException);
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Throws(serviceException);
+
+            // when
+            ValueTask<Player> modifyPlayerTask =
+                this.playerService.ModifyPlayerAsync(randomPlayer);
+
+            PlayerServiceException actualPlayerServiceException =
+                await Assert.ThrowsAsync<PlayerServiceException>(
+                    modifyPlayerTask.AsTask);
+
+            // then
+            actualPlayerServiceException.Should()
+                .BeEquivalentTo(expectedPlayerServiceException);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectPlayerByIdAsync(randomPlayer.Id),
+                    Times.Never);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expectedPlayerServiceException))),
                         Times.Once);
 
             this.storageBrokerMock.Verify(broker =>
