@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using EFxceptions.Models.Exceptions;
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
 using Moq;
@@ -54,6 +55,60 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
 
             this.storageBrokerMock.Verify(broker =>
                 broker.UpdatePlayerAsync(randomPlayer),
+                    Times.Never);
+
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async void ShouldThrowValidationExceptionOnModifyIfReferenceErrorOccursAndLogItAsync()
+        {
+            // given
+            Player somePlayer = CreateRandomPlayer();
+            string randomMessage = GetRandomMessage();
+            string exceptionMessage = randomMessage;
+
+            var foreignKeyConstraintConflictException =
+                new ForeignKeyConstraintConflictException(exceptionMessage);
+
+            var invalidPlayerReferenceException =
+                new InvalidPlayerReferenceException(foreignKeyConstraintConflictException);
+
+            PlayerDependencyValidationException expectedPlayerDependencyValidationException =
+                new PlayerDependencyValidationException(invalidPlayerReferenceException);
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Throws(foreignKeyConstraintConflictException);
+
+            // when
+            ValueTask<Player> modifyPlayerTask =
+                this.playerService.ModifyPlayerAsync(somePlayer);
+
+            PlayerDependencyValidationException actualPlayerDependencyValidationException =
+                await Assert.ThrowsAsync<PlayerDependencyValidationException>(
+                    modifyPlayerTask.AsTask);
+
+            // then
+            actualPlayerDependencyValidationException.Should()
+                .BeEquivalentTo(expectedPlayerDependencyValidationException);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectPlayerByIdAsync(somePlayer.Id),
+                    Times.Never);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(expectedPlayerDependencyValidationException))),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.UpdatePlayerAsync(somePlayer),
                     Times.Never);
 
             this.dateTimeBrokerMock.VerifyNoOtherCalls();
