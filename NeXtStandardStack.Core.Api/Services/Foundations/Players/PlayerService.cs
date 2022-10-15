@@ -1,62 +1,65 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Force.DeepCloner;
-using Moq;
+using NeXtStandardStack.Core.Api.Brokers.DateTimes;
+using NeXtStandardStack.Core.Api.Brokers.Loggings;
+using NeXtStandardStack.Core.Api.Brokers.Storages;
 using NeXtStandardStack.Core.Api.Models.Players;
-using Xunit;
 
-namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
+namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
 {
-    public partial class PlayerServiceTests
+    public partial class PlayerService : IPlayerService
     {
-        [Fact]
-        public async Task ShouldModifyPlayerAsync()
+        private readonly IStorageBroker storageBroker;
+        private readonly IDateTimeBroker dateTimeBroker;
+        private readonly ILoggingBroker loggingBroker;
+
+        public PlayerService(
+            IStorageBroker storageBroker,
+            IDateTimeBroker dateTimeBroker,
+            ILoggingBroker loggingBroker)
         {
-            // given
-            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
-            Player randomPlayer = CreateRandomModifyPlayer(randomDateTimeOffset);
-            Player inputPlayer = randomPlayer;
-            Player storagePlayer = inputPlayer.DeepClone();
-            storagePlayer.UpdatedDate = randomPlayer.CreatedDate;
-            Player updatedPlayer = inputPlayer;
-            Player expectedPlayer = updatedPlayer.DeepClone();
-            Guid playerId = inputPlayer.Id;
-
-            this.dateTimeBrokerMock.Setup(broker =>
-                broker.GetCurrentDateTimeOffset())
-                    .Returns(randomDateTimeOffset);
-
-            this.storageBrokerMock.Setup(broker =>
-                broker.SelectPlayerByIdAsync(playerId))
-                    .ReturnsAsync(storagePlayer);
-
-            this.storageBrokerMock.Setup(broker =>
-                broker.UpdatePlayerAsync(inputPlayer))
-                    .ReturnsAsync(updatedPlayer);
-
-            // when
-            Player actualPlayer =
-                await this.playerService.ModifyPlayerAsync(inputPlayer);
-
-            // then
-            actualPlayer.Should().BeEquivalentTo(expectedPlayer);
-
-            this.dateTimeBrokerMock.Verify(broker =>
-                broker.GetCurrentDateTimeOffset(),
-                    Times.Once);
-
-            this.storageBrokerMock.Verify(broker =>
-                broker.SelectPlayerByIdAsync(inputPlayer.Id),
-                    Times.Once);
-
-            this.storageBrokerMock.Verify(broker =>
-                broker.UpdatePlayerAsync(inputPlayer),
-                    Times.Once);
-
-            this.storageBrokerMock.VerifyNoOtherCalls();
-            this.loggingBrokerMock.VerifyNoOtherCalls();
-            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+            this.storageBroker = storageBroker;
+            this.dateTimeBroker = dateTimeBroker;
+            this.loggingBroker = loggingBroker;
         }
+
+        public ValueTask<Player> AddPlayerAsync(Player player) =>
+            TryCatch(async () =>
+            {
+                ValidatePlayerOnAdd(player);
+
+                return await this.storageBroker.InsertPlayerAsync(player);
+            });
+
+        public IQueryable<Player> RetrieveAllPlayers() =>
+            TryCatch(() => this.storageBroker.SelectAllPlayers());
+
+        public ValueTask<Player> RetrievePlayerByIdAsync(Guid playerId) =>
+            TryCatch(async () =>
+            {
+                ValidatePlayerId(playerId);
+
+                Player maybePlayer = await this.storageBroker
+                    .SelectPlayerByIdAsync(playerId);
+
+                ValidateStoragePlayer(maybePlayer, playerId);
+
+                return maybePlayer;
+            });
+
+        public ValueTask<Player> ModifyPlayerAsync(Player player) =>
+            TryCatch(async () =>
+            {
+                ValidatePlayerOnModify(player);
+
+                Player maybePlayer =
+                    await this.storageBroker.SelectPlayerByIdAsync(player.Id);
+
+                ValidateStoragePlayer(maybePlayer, player.Id);
+                ValidateAgainstStoragePlayerOnModify(inputPlayer: player, storagePlayer: maybePlayer);
+
+                return await this.storageBroker.UpdatePlayerAsync(player);
+            });
     }
 }

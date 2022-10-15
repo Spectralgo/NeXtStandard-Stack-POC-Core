@@ -77,6 +77,16 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
             }
         }
 
+        private static void ValidateAgainstStoragePlayerOnModify(Player inputPlayer, Player storagePlayer)
+        {
+            Validate(
+                (Rule: IsNotSame(
+                    firstDate: inputPlayer.CreatedDate,
+                    secondDate: storagePlayer.CreatedDate,
+                    secondDateName: nameof(Player.CreatedDate)),
+                Parameter: nameof(Player.CreatedDate)));
+        }
+
         private static dynamic IsInvalid(Guid id) => new
         {
             Condition = id == Guid.Empty,
