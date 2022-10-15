@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using EFxceptions.Models.Exceptions;
 using Microsoft.Data.SqlClient;
 using NeXtStandardStack.Core.Api.Models.Players;
 using NeXtStandardStack.Core.Api.Models.Players.Exceptions;
@@ -31,6 +32,13 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
 
                 throw CreateAndLogCriticalDependencyException(failedPlayerStorageException);
             }
+            catch (DuplicateKeyException duplicateKeyException)
+            {
+                var alreadyExistsPlayerException =
+                    new AlreadyExistsPlayerException(duplicateKeyException);
+
+                throw CreateAndLogDependencyValidationException(alreadyExistsPlayerException);
+            }
         }
 
         private PlayerValidationException CreateAndLogValidationException(Xeption exception)
@@ -49,6 +57,16 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
             this.loggingBroker.LogCritical(playerDependencyException);
 
             return playerDependencyException;
+        }
+
+        private PlayerDependencyValidationException CreateAndLogDependencyValidationException(Xeption exception)
+        {
+            var playerDependencyValidationException =
+                new PlayerDependencyValidationException(exception);
+
+            this.loggingBroker.LogError(playerDependencyValidationException);
+
+            return playerDependencyValidationException;
         }
     }
 }
