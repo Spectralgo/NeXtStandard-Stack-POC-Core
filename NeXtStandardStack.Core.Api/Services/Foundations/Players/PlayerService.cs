@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using NeXtStandardStack.Core.Api.Brokers.DateTimes;
 using NeXtStandardStack.Core.Api.Brokers.Loggings;
@@ -29,5 +30,8 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
 
                 return await this.storageBroker.InsertPlayerAsync(player);
             });
+
+        public IQueryable<Player> RetrieveAllPlayers() =>
+            throw new System.NotImplementedException();
     }
 }

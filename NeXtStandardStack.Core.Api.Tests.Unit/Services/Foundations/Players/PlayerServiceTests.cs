@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using Microsoft.Data.SqlClient;
@@ -62,6 +63,13 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
 
         private static DateTimeOffset GetRandomDateTimeOffset() =>
             new DateTimeRange(earliestDate: new DateTime()).GetValue();
+
+        private static IQueryable<Player> CreateRandomPlayers()
+        {
+            return CreatePlayerFiller(dateTimeOffset: GetRandomDateTimeOffset())
+                .Create(count: GetRandomNumber())
+                    .AsQueryable();
+        }
 
         private static Player CreateRandomPlayer() =>
             CreatePlayerFiller(dateTimeOffset: GetRandomDateTimeOffset()).Create();
