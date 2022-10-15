@@ -27,8 +27,8 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                 this.playerService.AddPlayerAsync(nullPlayer);
 
             PlayerValidationException actualPlayerValidationException =
-                await Assert.ThrowsAsync<PlayerValidationException>(
-                    addPlayerTask.AsTask);
+                await Assert.ThrowsAsync<PlayerValidationException>(() =>
+                    addPlayerTask.AsTask());
 
             // then
             actualPlayerValidationException.Should()
@@ -93,12 +93,16 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                 this.playerService.AddPlayerAsync(invalidPlayer);
 
             PlayerValidationException actualPlayerValidationException =
-                await Assert.ThrowsAsync<PlayerValidationException>(
-                    addPlayerTask.AsTask);
+                await Assert.ThrowsAsync<PlayerValidationException>(() =>
+                    addPlayerTask.AsTask());
 
             // then
             actualPlayerValidationException.Should()
                 .BeEquivalentTo(expectedPlayerValidationException);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(),
+                    Times.Once());
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogError(It.Is(SameExceptionAs(
@@ -135,17 +139,25 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             var expectedPlayerValidationException =
                 new PlayerValidationException(invalidPlayerException);
 
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Returns(randomDateTimeOffset);
+
             // when
             ValueTask<Player> addPlayerTask =
                 this.playerService.AddPlayerAsync(invalidPlayer);
 
             PlayerValidationException actualPlayerValidationException =
-                await Assert.ThrowsAsync<PlayerValidationException>(
-                    addPlayerTask.AsTask);
+                await Assert.ThrowsAsync<PlayerValidationException>(() =>
+                    addPlayerTask.AsTask());
 
             // then
             actualPlayerValidationException.Should()
                 .BeEquivalentTo(expectedPlayerValidationException);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(),
+                    Times.Once());
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogError(It.Is(SameExceptionAs(
@@ -156,9 +168,9 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                 broker.InsertPlayerAsync(It.IsAny<Player>()),
                     Times.Never);
 
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
-            this.dateTimeBrokerMock.VerifyNoOtherCalls();
         }
 
         [Fact]
@@ -180,17 +192,25 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             var expectedPlayerValidationException =
                 new PlayerValidationException(invalidPlayerException);
 
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Returns(randomDateTimeOffset);
+
             // when
             ValueTask<Player> addPlayerTask =
                 this.playerService.AddPlayerAsync(invalidPlayer);
 
             PlayerValidationException actualPlayerValidationException =
-                await Assert.ThrowsAsync<PlayerValidationException>(
-                    addPlayerTask.AsTask);
+                await Assert.ThrowsAsync<PlayerValidationException>(() =>
+                    addPlayerTask.AsTask());
 
             // then
             actualPlayerValidationException.Should()
                 .BeEquivalentTo(expectedPlayerValidationException);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(),
+                    Times.Once());
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogError(It.Is(SameExceptionAs(
@@ -239,8 +259,8 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                 this.playerService.AddPlayerAsync(invalidPlayer);
 
             PlayerValidationException actualPlayerValidationException =
-                await Assert.ThrowsAsync<PlayerValidationException>(
-                    addPlayerTask.AsTask);
+                await Assert.ThrowsAsync<PlayerValidationException>(() =>
+                    addPlayerTask.AsTask());
 
             // then
             actualPlayerValidationException.Should()

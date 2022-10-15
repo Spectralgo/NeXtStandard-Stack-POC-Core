@@ -30,7 +30,9 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
                     firstId: player.UpdatedByUserId,
                     secondId: player.CreatedByUserId,
                     secondIdName: nameof(Player.CreatedByUserId)),
-                Parameter: nameof(Player.UpdatedByUserId)));
+                Parameter: nameof(Player.UpdatedByUserId)),
+
+                (Rule: IsNotRecent(player.CreatedDate), Parameter: nameof(Player.CreatedDate)));
         }
 
         private static void ValidatePlayerIsNotNull(Player player)
@@ -70,6 +72,23 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
                 Condition = firstId != secondId,
                 Message = $"Id is not the same as {secondIdName}"
             };
+
+        private dynamic IsNotRecent(DateTimeOffset date) => new
+        {
+            Condition = IsDateNotRecent(date),
+            Message = "Date is not recent"
+        };
+
+        private bool IsDateNotRecent(DateTimeOffset date)
+        {
+            DateTimeOffset currentDateTime =
+                this.dateTimeBroker.GetCurrentDateTimeOffset();
+
+            TimeSpan timeDifference = currentDateTime.Subtract(date);
+            TimeSpan oneMinute = TimeSpan.FromMinutes(1);
+
+            return timeDifference.Duration() > oneMinute;
+        }
 
         private static void Validate(params (dynamic Rule, string Parameter)[] validations)
         {

@@ -22,6 +22,10 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             Player storagePlayer = inputPlayer;
             Player expectedPlayer = storagePlayer.DeepClone();
 
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                    .Returns(randomDateTimeOffset);
+
             this.storageBrokerMock.Setup(broker =>
                 broker.InsertPlayerAsync(inputPlayer))
                     .ReturnsAsync(storagePlayer);
@@ -33,13 +37,17 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             // then
             actualPlayer.Should().BeEquivalentTo(expectedPlayer);
 
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(),
+                    Times.Once());
+
             this.storageBrokerMock.Verify(broker =>
                 broker.InsertPlayerAsync(inputPlayer),
                     Times.Once);
 
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
-            this.dateTimeBrokerMock.VerifyNoOtherCalls();
         }
     }
 }
