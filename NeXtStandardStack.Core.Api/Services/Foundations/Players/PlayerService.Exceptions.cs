@@ -19,6 +19,10 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
             {
                 throw CreateAndLogValidationException(nullPlayerException);
             }
+            catch (InvalidPlayerException invalidPlayerException)
+            {
+                throw CreateAndLogValidationException(invalidPlayerException);
+            }
         }
 
         private PlayerValidationException CreateAndLogValidationException(Xeption exception)
