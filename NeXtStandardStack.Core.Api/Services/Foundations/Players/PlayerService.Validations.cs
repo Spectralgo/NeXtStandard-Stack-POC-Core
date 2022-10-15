@@ -24,7 +24,13 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
                     firstDate: player.UpdatedDate,
                     secondDate: player.CreatedDate,
                     secondDateName: nameof(Player.CreatedDate)),
-                Parameter: nameof(Player.UpdatedDate)));
+                Parameter: nameof(Player.UpdatedDate)),
+
+                (Rule: IsNotSame(
+                    firstId: player.UpdatedByUserId,
+                    secondId: player.CreatedByUserId,
+                    secondIdName: nameof(Player.CreatedByUserId)),
+                Parameter: nameof(Player.UpdatedByUserId)));
         }
 
         private static void ValidatePlayerIsNotNull(Player player)
@@ -54,6 +60,15 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
             {
                 Condition = firstDate != secondDate,
                 Message = $"Date is not the same as {secondDateName}"
+            };
+
+        private static dynamic IsNotSame(
+            Guid firstId,
+            Guid secondId,
+            string secondIdName) => new
+            {
+                Condition = firstId != secondId,
+                Message = $"Id is not the same as {secondIdName}"
             };
 
         private static void Validate(params (dynamic Rule, string Parameter)[] validations)
