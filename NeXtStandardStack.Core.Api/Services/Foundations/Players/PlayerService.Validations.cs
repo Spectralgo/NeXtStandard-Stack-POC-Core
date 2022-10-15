@@ -47,7 +47,13 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
                 (Rule: IsInvalid(player.CreatedDate), Parameter: nameof(Player.CreatedDate)),
                 (Rule: IsInvalid(player.CreatedByUserId), Parameter: nameof(Player.CreatedByUserId)),
                 (Rule: IsInvalid(player.UpdatedDate), Parameter: nameof(Player.UpdatedDate)),
-                (Rule: IsInvalid(player.UpdatedByUserId), Parameter: nameof(Player.UpdatedByUserId)));
+                (Rule: IsInvalid(player.UpdatedByUserId), Parameter: nameof(Player.UpdatedByUserId)),
+
+                (Rule: IsSame(
+                    firstDate: player.UpdatedDate,
+                    secondDate: player.CreatedDate,
+                    secondDateName: nameof(Player.CreatedDate)),
+                Parameter: nameof(Player.UpdatedDate)));
         }
 
         public void ValidatePlayerId(Guid playerId) =>
@@ -80,6 +86,15 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
             Condition = date == default,
             Message = "Date is required"
         };
+
+        private static dynamic IsSame(
+            DateTimeOffset firstDate,
+            DateTimeOffset secondDate,
+            string secondDateName) => new
+            {
+                Condition = firstDate == secondDate,
+                Message = $"Date is the same as {secondDateName}"
+            };
 
         private static dynamic IsNotSame(
             DateTimeOffset firstDate,

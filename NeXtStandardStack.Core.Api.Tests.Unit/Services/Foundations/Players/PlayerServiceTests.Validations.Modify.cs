@@ -84,7 +84,11 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
 
             invalidPlayerException.AddData(
                 key: nameof(Player.UpdatedDate),
-                values: "Date is required");
+                values:
+                new[] {
+                    "Date is required",
+                    $"Date is the same as {nameof(Player.CreatedDate)}"
+                });
 
             invalidPlayerException.AddData(
                 key: nameof(Player.UpdatedByUserId),
