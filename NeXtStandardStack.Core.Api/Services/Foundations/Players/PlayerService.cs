@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using NeXtStandardStack.Core.Api.Brokers.DateTimes;
@@ -33,5 +34,8 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
 
         public IQueryable<Player> RetrieveAllPlayers() =>
             TryCatch(() => this.storageBroker.SelectAllPlayers());
+
+        public ValueTask<Player> RetrievePlayerByIdAsync(Guid playerId) =>
+            throw new NotImplementedException();
     }
 }
