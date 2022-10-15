@@ -38,6 +38,16 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
         private void ValidatePlayerOnModify(Player player)
         {
             ValidatePlayerIsNotNull(player);
+
+            Validate(
+                (Rule: IsInvalid(player.Id), Parameter: nameof(Player.Id)),
+
+                // TODO: Add any other required validation rules
+
+                (Rule: IsInvalid(player.CreatedDate), Parameter: nameof(Player.CreatedDate)),
+                (Rule: IsInvalid(player.CreatedByUserId), Parameter: nameof(Player.CreatedByUserId)),
+                (Rule: IsInvalid(player.UpdatedDate), Parameter: nameof(Player.UpdatedDate)),
+                (Rule: IsInvalid(player.UpdatedByUserId), Parameter: nameof(Player.UpdatedByUserId)));
         }
 
         public void ValidatePlayerId(Guid playerId) =>
