@@ -11,5 +11,6 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
         IQueryable<Player> RetrieveAllPlayers();
         ValueTask<Player> RetrievePlayerByIdAsync(Guid playerId);
         ValueTask<Player> ModifyPlayerAsync(Player player);
+        ValueTask<Player> RemovePlayerByIdAsync(Guid playerId);
     }
 }
