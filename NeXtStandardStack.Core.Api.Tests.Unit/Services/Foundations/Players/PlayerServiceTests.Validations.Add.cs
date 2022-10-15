@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
@@ -83,6 +84,53 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             invalidPlayerException.AddData(
                 key: nameof(Player.UpdatedByUserId),
                 values: "Id is required");
+
+            var expectedPlayerValidationException =
+                new PlayerValidationException(invalidPlayerException);
+
+            // when
+            ValueTask<Player> addPlayerTask =
+                this.playerService.AddPlayerAsync(invalidPlayer);
+
+            PlayerValidationException actualPlayerValidationException =
+                await Assert.ThrowsAsync<PlayerValidationException>(
+                    addPlayerTask.AsTask);
+
+            // then
+            actualPlayerValidationException.Should()
+                .BeEquivalentTo(expectedPlayerValidationException);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expectedPlayerValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.InsertPlayerAsync(It.IsAny<Player>()),
+                    Times.Never);
+
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnAddIfCreateAndUpdateDatesIsNotSameAndLogItAsync()
+        {
+            // given
+            int randomNumber = GetRandomNumber();
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Player randomPlayer = CreateRandomPlayer(randomDateTimeOffset);
+            Player invalidPlayer = randomPlayer;
+
+            invalidPlayer.UpdatedDate =
+                invalidPlayer.CreatedDate.AddDays(randomNumber);
+
+            var invalidPlayerException = new InvalidPlayerException();
+
+            invalidPlayerException.AddData(
+                key: nameof(Player.UpdatedDate),
+                values: $"Date is not the same as {nameof(Player.CreatedDate)}");
 
             var expectedPlayerValidationException =
                 new PlayerValidationException(invalidPlayerException);
