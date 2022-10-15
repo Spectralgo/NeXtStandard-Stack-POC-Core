@@ -1,6 +1,8 @@
+using System;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using NeXtStandardStack.Core.Api.Models.Players;
 using NeXtStandardStack.Core.Api.Models.Players.Exceptions;
@@ -54,6 +56,55 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
 
             this.dateTimeBrokerMock.Verify(broker =>
                 broker.GetCurrentDateTimeOffset(),
+                    Times.Never);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        public async Task ShouldThrowDependencyValidationOnRemoveIfDatabaseUpdateConcurrencyErrorOccursAndLogItAsync()
+        {
+            // given
+            Guid somePlayerId = Guid.NewGuid();
+
+            var databaseUpdateConcurrencyException =
+                new DbUpdateConcurrencyException();
+
+            var lockedPlayerException =
+                new LockedPlayerException(databaseUpdateConcurrencyException);
+
+            var expectedPlayerDependencyValidationException =
+                new PlayerDependencyValidationException(lockedPlayerException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectPlayerByIdAsync(It.IsAny<Guid>()))
+                    .ThrowsAsync(databaseUpdateConcurrencyException);
+
+            // when
+            ValueTask<Player> removePlayerByIdTask =
+                this.playerService.RemovePlayerByIdAsync(somePlayerId);
+
+            PlayerDependencyValidationException actualPlayerDependencyValidationException =
+                await Assert.ThrowsAsync<PlayerDependencyValidationException>(
+                    removePlayerByIdTask.AsTask);
+
+            // then
+            actualPlayerDependencyValidationException.Should()
+                .BeEquivalentTo(expectedPlayerDependencyValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectPlayerByIdAsync(It.IsAny<Guid>()),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expectedPlayerDependencyValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.DeletePlayerAsync(It.IsAny<Player>()),
                     Times.Never);
 
             this.storageBrokerMock.VerifyNoOtherCalls();
