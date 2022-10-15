@@ -1,5 +1,7 @@
 using System;
 using System.Linq.Expressions;
+using System.Runtime.Serialization;
+using Microsoft.Data.SqlClient;
 using Moq;
 using NeXtStandardStack.Core.Api.Brokers.DateTimes;
 using NeXtStandardStack.Core.Api.Brokers.Loggings;
@@ -46,6 +48,9 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             };
         }
 
+        private static SqlException GetSqlException() =>
+            (SqlException)FormatterServices.GetUninitializedObject(typeof(SqlException));
+
         private static int GetRandomNumber() =>
             new IntRange(min: 2, max: 10).GetValue();
 
@@ -54,6 +59,9 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
 
         private static DateTimeOffset GetRandomDateTimeOffset() =>
             new DateTimeRange(earliestDate: new DateTime()).GetValue();
+
+        private static Player CreateRandomPlayer() =>
+            CreatePlayerFiller(dateTimeOffset: GetRandomDateTimeOffset()).Create();
 
         private static Player CreateRandomPlayer(DateTimeOffset dateTimeOffset) =>
             CreatePlayerFiller(dateTimeOffset).Create();
