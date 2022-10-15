@@ -62,12 +62,15 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
                 return await this.storageBroker.UpdatePlayerAsync(player);
             });
 
-        public async ValueTask<Player> RemovePlayerByIdAsync(Guid playerId)
-        {
-            Player maybePlayer = await this.storageBroker
+        public ValueTask<Player> RemovePlayerByIdAsync(Guid playerId) =>
+            TryCatch(async () =>
+            {
+                ValidatePlayerId(playerId);
+
+                Player maybePlayer = await this.storageBroker
                     .SelectPlayerByIdAsync(playerId);
 
-            return await this.storageBroker.DeletePlayerAsync(maybePlayer);
-        }
+                return await this.storageBroker.DeletePlayerAsync(maybePlayer);
+            });
     }
 }
