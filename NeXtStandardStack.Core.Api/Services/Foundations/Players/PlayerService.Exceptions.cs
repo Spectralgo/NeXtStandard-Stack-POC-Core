@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using NeXtStandardStack.Core.Api.Models.Players;
 using NeXtStandardStack.Core.Api.Models.Players.Exceptions;
 using Xeptions;
@@ -23,6 +24,13 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
             {
                 throw CreateAndLogValidationException(invalidPlayerException);
             }
+            catch (SqlException sqlException)
+            {
+                var failedPlayerStorageException =
+                    new FailedPlayerStorageException(sqlException);
+
+                throw CreateAndLogCriticalDependencyException(failedPlayerStorageException);
+            }
         }
 
         private PlayerValidationException CreateAndLogValidationException(Xeption exception)
@@ -33,6 +41,14 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
             this.loggingBroker.LogError(playerValidationException);
 
             return playerValidationException;
+        }
+
+        private PlayerDependencyException CreateAndLogCriticalDependencyException(Xeption exception)
+        {
+            var playerDependencyException = new PlayerDependencyException(exception);
+            this.loggingBroker.LogCritical(playerDependencyException);
+
+            return playerDependencyException;
         }
     }
 }
