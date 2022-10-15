@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using Moq;
 using NeXtStandardStack.Core.Api.Brokers.DateTimes;
 using NeXtStandardStack.Core.Api.Brokers.Loggings;
@@ -6,6 +7,7 @@ using NeXtStandardStack.Core.Api.Brokers.Storages;
 using NeXtStandardStack.Core.Api.Models.Players;
 using NeXtStandardStack.Core.Api.Services.Foundations.Players;
 using Tynamix.ObjectFiller;
+using Xeptions;
 
 namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
 {
@@ -27,6 +29,9 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                 dateTimeBroker: this.dateTimeBrokerMock.Object,
                 loggingBroker: this.loggingBrokerMock.Object);
         }
+
+        private static Expression<Func<Xeption, bool>> SameExceptionAs(Xeption expectedException) =>
+            actualException => actualException.SameExceptionAs(expectedException);
 
         private static DateTimeOffset GetRandomDateTimeOffset() =>
             new DateTimeRange(earliestDate: new DateTime()).GetValue();
