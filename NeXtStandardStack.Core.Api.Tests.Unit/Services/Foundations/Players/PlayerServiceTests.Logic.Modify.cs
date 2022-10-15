@@ -28,6 +28,10 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                     .Returns(randomDateTimeOffset);
 
             this.storageBrokerMock.Setup(broker =>
+                broker.SelectPlayerByIdAsync(playerId))
+                    .ReturnsAsync(storagePlayer);
+
+            this.storageBrokerMock.Setup(broker =>
                 broker.UpdatePlayerAsync(inputPlayer))
                     .ReturnsAsync(updatedPlayer);
 
@@ -43,12 +47,16 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                     Times.Once);
 
             this.storageBrokerMock.Verify(broker =>
+                broker.SelectPlayerByIdAsync(inputPlayer.Id),
+                    Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
                 broker.UpdatePlayerAsync(inputPlayer),
                     Times.Once);
 
-            this.dateTimeBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
         }
     }
 }
