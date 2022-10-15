@@ -6,7 +6,9 @@ namespace NeXtStandardStack.Core.Api.Models.Players
     {
         public Guid Id { get; set; }
 
-        // TODO:  Add your properties here
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string GamerTag { get; set; }
 
         public Guid CreatedByUserId { get; set; }
         public DateTimeOffset CreatedDate { get; set; }
