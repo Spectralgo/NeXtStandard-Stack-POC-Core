@@ -35,6 +35,9 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
                 (Rule: IsNotRecent(player.CreatedDate), Parameter: nameof(Player.CreatedDate)));
         }
 
+        public void ValidatePlayerId(Guid playerId) =>
+            Validate((Rule: IsInvalid(playerId), Parameter: nameof(Player.Id)));
+
         private static void ValidatePlayerIsNotNull(Player player)
         {
             if (player is null)
