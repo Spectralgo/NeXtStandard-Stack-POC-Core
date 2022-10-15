@@ -160,5 +160,50 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.dateTimeBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowValidationExceptionOnAddIfCreateAndUpdateUserIdsIsNotSameAndLogItAsync()
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Player randomPlayer = CreateRandomPlayer(randomDateTimeOffset);
+            Player invalidPlayer = randomPlayer;
+            invalidPlayer.UpdatedByUserId = Guid.NewGuid();
+
+            var invalidPlayerException =
+                new InvalidPlayerException();
+
+            invalidPlayerException.AddData(
+                key: nameof(Player.UpdatedByUserId),
+                values: $"Id is not the same as {nameof(Player.CreatedByUserId)}");
+
+            var expectedPlayerValidationException =
+                new PlayerValidationException(invalidPlayerException);
+
+            // when
+            ValueTask<Player> addPlayerTask =
+                this.playerService.AddPlayerAsync(invalidPlayer);
+
+            PlayerValidationException actualPlayerValidationException =
+                await Assert.ThrowsAsync<PlayerValidationException>(
+                    addPlayerTask.AsTask);
+
+            // then
+            actualPlayerValidationException.Should()
+                .BeEquivalentTo(expectedPlayerValidationException);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expectedPlayerValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.InsertPlayerAsync(It.IsAny<Player>()),
+                    Times.Never);
+
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
