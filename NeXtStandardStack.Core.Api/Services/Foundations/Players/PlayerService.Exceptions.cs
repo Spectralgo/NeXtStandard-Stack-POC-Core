@@ -36,6 +36,10 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
 
                 throw CreateAndLogCriticalDependencyException(failedPlayerStorageException);
             }
+            catch (NotFoundPlayerException notFoundPlayerException)
+            {
+                throw CreateAndLogValidationException(notFoundPlayerException);
+            }
             catch (DuplicateKeyException duplicateKeyException)
             {
                 var alreadyExistsPlayerException =

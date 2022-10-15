@@ -38,6 +38,14 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
         public void ValidatePlayerId(Guid playerId) =>
             Validate((Rule: IsInvalid(playerId), Parameter: nameof(Player.Id)));
 
+        private static void ValidateStoragePlayer(Player maybePlayer, Guid playerId)
+        {
+            if (maybePlayer is null)
+            {
+                throw new NotFoundPlayerException(playerId);
+            }
+        }
+
         private static void ValidatePlayerIsNotNull(Player player)
         {
             if (player is null)
