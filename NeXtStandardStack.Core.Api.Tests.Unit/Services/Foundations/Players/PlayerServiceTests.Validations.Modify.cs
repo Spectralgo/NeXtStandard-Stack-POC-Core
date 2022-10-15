@@ -106,7 +106,8 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                     modifyPlayerTask.AsTask);
 
             //then
-            actualPlayerValidationException.Should().BeEquivalentTo(expectedPlayerValidationException);
+            actualPlayerValidationException.Should()
+                .BeEquivalentTo(expectedPlayerValidationException);
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogError(It.Is(SameExceptionAs(
@@ -147,7 +148,8 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
                     modifyPlayerTask.AsTask);
 
             // then
-            actualPlayerValidationException.Should().BeEquivalentTo(expectedPlayerValidationException);
+            actualPlayerValidationException.Should()
+                .BeEquivalentTo(expectedPlayerValidationException);
 
             this.loggingBrokerMock.Verify(broker =>
                 broker.LogError(It.Is(SameExceptionAs(
@@ -161,6 +163,58 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             this.loggingBrokerMock.VerifyNoOtherCalls();
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
+
+        [Theory]
+        [MemberData(nameof(MinutesBeforeOrAfter))]
+        public async Task ShouldThrowValidationExceptionOnModifyIfUpdatedDateIsNotRecentAndLogItAsync(int minutes)
+        {
+            // given
+            DateTimeOffset randomDateTimeOffset = GetRandomDateTimeOffset();
+            Player randomPlayer = CreateRandomPlayer(randomDateTimeOffset);
+            randomPlayer.UpdatedDate = randomDateTimeOffset.AddMinutes(minutes);
+
+            var invalidPlayerException =
+                new InvalidPlayerException();
+
+            invalidPlayerException.AddData(
+                key: nameof(Player.UpdatedDate),
+                values: "Date is not recent");
+
+            var expectedPlayerValidatonException =
+                new PlayerValidationException(invalidPlayerException);
+
+            this.dateTimeBrokerMock.Setup(broker =>
+                broker.GetCurrentDateTimeOffset())
+                .Returns(randomDateTimeOffset);
+
+            // when
+            ValueTask<Player> modifyPlayerTask =
+                this.playerService.ModifyPlayerAsync(randomPlayer);
+
+            PlayerValidationException actualPlayerValidationException =
+                await Assert.ThrowsAsync<PlayerValidationException>(
+                    modifyPlayerTask.AsTask);
+
+            // then
+            actualPlayerValidationException.Should().BeEquivalentTo(expectedPlayerValidatonException);
+
+            this.dateTimeBrokerMock.Verify(broker =>
+                broker.GetCurrentDateTimeOffset(),
+                    Times.Once);
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expectedPlayerValidatonException))),
+                        Times.Once);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectPlayerByIdAsync(It.IsAny<Guid>()),
+                    Times.Never);
+
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.storageBrokerMock.VerifyNoOtherCalls();
         }
     }
 }
