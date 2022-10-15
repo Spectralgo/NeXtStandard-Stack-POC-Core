@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using NeXtStandardStack.Core.Api.Models.Players;
 using NeXtStandardStack.Core.Api.Models.Players.Exceptions;
 using Xeptions;
@@ -46,6 +47,13 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
 
                 throw CreateAndLogDependencyValidationException(invalidPlayerReferenceException);
             }
+            catch (DbUpdateException databaseUpdateException)
+            {
+                var failedPlayerStorageException =
+                    new FailedPlayerStorageException(databaseUpdateException);
+
+                throw CreateAndLogDependencyException(failedPlayerStorageException);
+            }
         }
 
         private PlayerValidationException CreateAndLogValidationException(Xeption exception)
@@ -74,6 +82,15 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
             this.loggingBroker.LogError(playerDependencyValidationException);
 
             return playerDependencyValidationException;
+        }
+
+        private PlayerDependencyException CreateAndLogDependencyException(
+            Xeption exception)
+        {
+            var playerDependencyException = new PlayerDependencyException(exception);
+            this.loggingBroker.LogError(playerDependencyException);
+
+            return playerDependencyException;
         }
     }
 }
