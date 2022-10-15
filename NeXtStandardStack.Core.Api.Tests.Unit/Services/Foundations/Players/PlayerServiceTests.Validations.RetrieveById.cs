@@ -51,5 +51,47 @@ namespace NeXtStandardStack.Core.Api.Tests.Unit.Services.Foundations.Players
             this.storageBrokerMock.VerifyNoOtherCalls();
             this.dateTimeBrokerMock.VerifyNoOtherCalls();
         }
+
+        [Fact]
+        public async Task ShouldThrowNotFoundExceptionOnRetrieveByIdIfPlayerIsNotFoundAndLogItAsync()
+        {
+            //given
+            Guid somePlayerId = Guid.NewGuid();
+            Player noPlayer = null;
+
+            var notFoundPlayerException =
+                new NotFoundPlayerException(somePlayerId);
+
+            var expectedPlayerValidationException =
+                new PlayerValidationException(notFoundPlayerException);
+
+            this.storageBrokerMock.Setup(broker =>
+                broker.SelectPlayerByIdAsync(It.IsAny<Guid>()))
+                    .ReturnsAsync(noPlayer);
+
+            //when
+            ValueTask<Player> retrievePlayerByIdTask =
+                this.playerService.RetrievePlayerByIdAsync(somePlayerId);
+
+            PlayerValidationException actualPlayerValidationException =
+                await Assert.ThrowsAsync<PlayerValidationException>(
+                    retrievePlayerByIdTask.AsTask);
+
+            //then
+            actualPlayerValidationException.Should().BeEquivalentTo(expectedPlayerValidationException);
+
+            this.storageBrokerMock.Verify(broker =>
+                broker.SelectPlayerByIdAsync(It.IsAny<Guid>()),
+                    Times.Once());
+
+            this.loggingBrokerMock.Verify(broker =>
+                broker.LogError(It.Is(SameExceptionAs(
+                    expectedPlayerValidationException))),
+                        Times.Once);
+
+            this.storageBrokerMock.VerifyNoOtherCalls();
+            this.loggingBrokerMock.VerifyNoOtherCalls();
+            this.dateTimeBrokerMock.VerifyNoOtherCalls();
+        }
     }
 }
