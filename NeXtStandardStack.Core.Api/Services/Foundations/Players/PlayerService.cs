@@ -48,7 +48,12 @@ namespace NeXtStandardStack.Core.Api.Services.Foundations.Players
                 return maybePlayer;
             });
 
-        public async ValueTask<Player> ModifyPlayerAsync(Player player) =>
-            await this.storageBroker.UpdatePlayerAsync(player);
+        public ValueTask<Player> ModifyPlayerAsync(Player player) =>
+            TryCatch(async () =>
+            {
+                ValidatePlayerOnModify(player);
+
+                return await this.storageBroker.UpdatePlayerAsync(player);
+            });
     }
 }
